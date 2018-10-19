@@ -1,13 +1,14 @@
 package com.rnbiometrics;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 
 import com.facebook.react.bridge.Promise;
@@ -28,6 +29,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
  */
 
 public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
+    private static final String FRAGMENT_TAG_DIALOG_FRAGMENT = "BIOMETRIC_DIALOG_FRAGMENT";
 
     protected String biometricKeyAlias = "biometric_key";
 
@@ -71,8 +73,8 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 ReactNativeBiometricsDialog dialog = new ReactNativeBiometricsDialog();
                 dialog.init(title, null, getCreationCallback(promise));
-                Activity activity = getCurrentActivity();
-                dialog.show(activity.getFragmentManager(), "fingerprint_dialog");
+                AppCompatActivity activity = (AppCompatActivity) getCurrentActivity();
+                dialog.show(activity.getSupportFragmentManager(), FRAGMENT_TAG_DIALOG_FRAGMENT);
             } else {
                 promise.reject("cannot generate keys on android versions below 6.0", "cannot generate keys on android versions below 6.0");
             }
@@ -107,13 +109,14 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                 ReactNativeBiometricsDialog dialog = new ReactNativeBiometricsDialog();
                 dialog.init(title, cryptoObject, getSignatureCallback(payload, promise));
 
-                Activity activity = getCurrentActivity();
-                dialog.show(activity.getFragmentManager(), "fingerprint_dialog");
+                AppCompatActivity activity = (AppCompatActivity) getCurrentActivity();
+                dialog.show(activity.getSupportFragmentManager(), FRAGMENT_TAG_DIALOG_FRAGMENT);
             } else {
                 promise.reject("cannot generate keys on android versions below 6.0", "cannot generate keys on android versions below 6.0");
             }
         } catch (Exception e) {
-            promise.reject("error signing payload: " + e.getMessage(), "error generating signature");
+            e.printStackTrace();
+            promise.reject("error signing payload: " + e.getMessage(), "error generating signature TESTING");
         }
     }
 
@@ -192,7 +195,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
 
             @Override
             public void onError() {
-                promise.reject("error generating public private keys" , "error generating public private keys");
+                promise.reject("error generating public private keys", "error generating public private keys");
             }
         };
     }
